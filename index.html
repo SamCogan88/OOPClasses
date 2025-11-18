@@ -216,6 +216,8 @@
       font-size: 0.78rem;
       padding: 0.35rem 0.4rem;
       overflow: auto;
+      white-space: pre;
+      font-family: "Fira Code", Consolas, monospace;
     }
     .hint { font-size: 0.76rem; color: #6b7280; margin-top: 0.25rem; }
 
@@ -238,7 +240,6 @@
   </header>
 
   <main class="container">
-    <!-- LEFT: Class list -->
     <section class="panel panel-left">
       <h2>Class Hierarchy</h2>
       <p>Click a class to view its definition.</p>
@@ -302,7 +303,6 @@
       </div>
     </section>
 
-    <!-- MIDDLE: Code display -->
     <section class="panel panel-middle">
       <div class="code-header">
         <h2>Class Definition</h2>
@@ -324,7 +324,6 @@
       </p>
     </section>
 
-    <!-- RIGHT: Object playground -->
     <section class="panel panel-right">
       <h2>Object Playground</h2>
       <p>
@@ -373,12 +372,11 @@
   </main>
 
   <script>
-    // --- Simple OOP model in JavaScript ---
     class Animal {
       constructor(name) {
         this.name = name;
         this.energy = 100;
-        this.lives = 1; // default, overridden in subclasses
+        this.lives = 1;
       }
       makeSound() { return "Some generic animal sound"; }
       eat() { this.energy += 10; }
@@ -391,57 +389,56 @@
     class Dog extends Animal {
       constructor(name) {
         super(name);
-        this.lives = 1; // dogs have 1 life
+        this.lives = 1;
       }
       makeSound() { return "Woof!"; }
-      fetchBall() { /* ... */ }
+      fetchBall() {}
     }
 
     class Cat extends Animal {
       constructor(name) {
         super(name);
-        this.lives = 9; // cats have 9 lives
+        this.lives = 9;
       }
       makeSound() { return "Meow!"; }
-      scratch() { /* ... */ }
+      scratch() {}
     }
 
     class Bird extends Animal {
       makeSound() { return "Tweet!"; }
-      fly() { /* ... */ }
+      fly() {}
     }
 
     class Labrador extends Dog {
       makeSound() { return "Happy woof!"; }
-      guide() { /* ... */ }
+      guide() {}
     }
 
     class Husky extends Dog {
       makeSound() { return "Woof! (howl)"; }
-      pullSled() { /* ... */ }
+      pullSled() {}
     }
 
     class Siamese extends Cat {
       makeSound() { return "Meow! (Siamese)"; }
-      sneak() { /* ... */ }
+      sneak() {}
     }
 
     class Persian extends Cat {
       makeSound() { return "Purr..."; }
-      groom() { /* ... */ }
+      groom() {}
     }
 
     class Parrot extends Bird {
       makeSound() { return "Squawk!"; }
-      speak() { /* ... */ }
+      speak() {}
     }
 
     class Eagle extends Bird {
       makeSound() { return "Screech!"; }
-      hunt() { /* ... */ }
+      hunt() {}
     }
 
-    // --- Java-like class definitions for display ---
     const classSource = {
       Animal: `
 class Animal {
@@ -453,12 +450,10 @@ class Animal {
         this.name = name;
     }
 
-    // ● Base implementation
     public String makeSound() {
         return "Some generic animal sound";
     }
 
-    // ● Encapsulated state & behaviour
     public void eat() { energy += 10; }
     public void run() { energy -= 10; }
     public int getEnergy() { return energy; }
@@ -470,10 +465,8 @@ class Dog extends Animal {
 
     public Dog(String name) {
         super(name);
-        // dogs have 1 life by default
     }
 
-    // ● Overridden from Animal
     @Override
     public String makeSound() {
         return "Woof!";
@@ -523,10 +516,8 @@ class Cat extends Animal {
 
     public Cat(String name) {
         super(name);
-        // cats have 9 lives
     }
 
-    // ● Overridden from Animal
     @Override
     public String makeSound() {
         return "Meow!";
@@ -578,13 +569,11 @@ class Bird extends Animal {
         super(name);
     }
 
-    // ● Overridden from Animal
     @Override
     public String makeSound() {
         return "Tweet!";
     }
 
-    // Birds can still be asked to "run", but we explain the behaviour instead
     @Override
     public void run() {
         System.out.println(name + " can't run — they fly instead.");
@@ -607,8 +596,6 @@ class Parrot extends Bird {
         return "Squawk!";
     }
 
-    // Inherits run() behaviour from Bird
-
     public void speak() {
         System.out.println(name + " says " + "\"Hello!\".");
     }
@@ -625,8 +612,6 @@ class Eagle extends Bird {
     public String makeSound() {
         return "Screech!";
     }
-
-    // Inherits run() behaviour from Bird
 
     public void hunt() {
         System.out.println(name + " hunts from above.");
@@ -679,8 +664,7 @@ class Eagle extends Bird {
       lines.push("    }");
       lines.push("}");
 
-      logOutput.textContent = lines.join("
-");
+      logOutput.textContent = lines.join("\n");
     }
 
     function clearLog() {
@@ -707,7 +691,6 @@ class Eagle extends Bird {
           const card = document.createElement("div");
           card.className = "animal-card";
 
-          // In this demo, all animals expose run(); birds just explain what happens
           let runButtonHtml =
             `<button class="mini base-method" onclick="runAnimal(${index})">run()</button>`;
 
@@ -738,7 +721,6 @@ class Eagle extends Bird {
         });
       }
 
-      // render array view (fixed size)
       const arrayView = document.getElementById("arrayView");
       if (arrayView) {
         arrayView.innerHTML = "";
@@ -792,7 +774,6 @@ class Eagle extends Bird {
 
       zoo.push({ id: nextId++, declaredType, actualType, instance });
       renderZoo();
-      // When we add an object, show its class in the hierarchy/code panel
       showClassCode(actualType);
 
       const newIndex = zoo.length - 1;
@@ -883,7 +864,6 @@ class Eagle extends Bird {
       });
     }
 
-    // init
     showClassCode("Animal");
     renderZoo();
     clearLog();
