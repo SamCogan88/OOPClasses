@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OOP Polymorphism Playground</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #111827;
+    }
+    h1, h2, h3 { margin-top: 0; }
+    code { font-family: "Fira Code", Consolas, monospace; font-size: 0.9rem; }
+    .header {
+      padding: 0.75rem 1.5rem;
+      background: #111827;
+      color: #f9fafb;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .header small { opacity: 0.75; font-size: 0.8rem; }
+    .container {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      height: calc(100vh - 60px);
+    }
+    .panel {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel h2 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+    .panel p { font-size: 0.85rem; margin-top: 0; color: #4b5563; }
+    .panel-left { flex: 0 0 18%; min-width: 200px; }
+    .panel-middle { flex: 0 0 38%; min-width: 280px; }
+    .panel-right { flex: 1; min-width: 320px; }
+
+    .class-list { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.5rem; }
+    .class-btn {
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 0.35rem 0.55rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .class-btn.level-0 { margin-left: 0; }
+    .class-btn.level-1 { margin-left: 0.9rem; }
+    .class-btn.level-2 { margin-left: 1.8rem; }
+    .class-btn span.kind { font-size: 0.7rem; text-transform: uppercase; color: #6b7280; }
+    .class-btn.active {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .legend { margin-top: 0.5rem; font-size: 0.78rem; color: #6b7280; border-top: 1px dashed #e5e7eb; padding-top: 0.4rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.2rem; }
+    .dot { width: 9px; height: 9px; border-radius: 999px; }
+    .dot-base { background: #0ea5e9; }
+    .dot-override { background: #f97316; }
+
+    .code-box {
+      flex: 1;
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      overflow: auto;
+      font-size: 0.83rem;
+      line-height: 1.35;
+      border: 1px solid #111827;
+    }
+    pre { margin: 0; white-space: pre; }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      border-radius: 999px;
+      padding: 0.1rem 0.6rem;
+      background: #e0f2fe;
+      color: #075985;
+      font-size: 0.7rem;
+    }
+    .pill code { font-size: 0.75rem; }
+
+    .playground-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      border-radius: 999px;
+      border: 1px solid #d4d4d8;
+      background: #f9fafb;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    button.primary { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
+    button.danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    button:hover { filter: brightness(0.98); }
+    button.mini { font-size: 0.75rem; padding: 0.15rem 0.5rem; }
+    button.base-method { background: #e0f2fe; border-color: #bae6fd; color: #075985; }
+    button.special-method { background: #ffedd5; border-color: #fed7aa; color: #9a3412; }
+
+    .playground-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
+      gap: 0.6rem;
+      flex: 1;
+      overflow: hidden;
+    }
+    .zoo-panel, .log-panel {
+      border-radius: 8px;
+      border: 1px solid #e4e4e7;
+      padding: 0.45rem 0.55rem;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .zoo-panel h3, .log-panel h3 { font-size: 0.9rem; margin: 0 0 0.3rem; }
+
+    .zoo-list {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .animal-card {
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      padding: 0.4rem 0.45rem;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .array-view {
+      display: flex;
+      gap: 0.25rem;
+      margin: 0.35rem 0 0.45rem;
+      font-size: 0.75rem;
+    }
+    .array-cell {
+      flex: 1;
+      border-radius: 4px;
+      border: 1px solid #d4d4d8;
+      background: #ffffff;
+      padding: 0.2rem 0.25rem;
+      text-align: center;
+    }
+    .array-index {
+      display: block;
+      color: #6b7280;
+      font-size: 0.7rem;
+      margin-bottom: 0.05rem;
+    }
+    .array-value {
+      font-weight: 500;
+    }
+    .animal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-weight: 600;
+    }
+    .badge {
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.05rem 0.45rem;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+    .animal-meta { font-size: 0.76rem; color: #4b5563; }
+    .small-label { font-size: 0.78rem; color: #6b7280; margin-bottom: 0.25rem; }
+
+    .pseudo-code {
+      font-size: 0.78rem;
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 6px;
+      padding: 0.3rem 0.4rem;
+      margin-bottom: 0.25rem;
+    }
+    .log-output {
+      flex: 1;
+      border-radius: 6px;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.78rem;
+      padding: 0.35rem 0.4rem;
+      overflow: auto;
+    }
+    .hint { font-size: 0.76rem; color: #6b7280; margin-top: 0.25rem; }
+
+    @media (max-width: 960px) {
+      .container { flex-direction: column; height: auto; }
+      .panel { height: auto; max-height: none; }
+      .playground-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1 style="font-size:1.2rem;margin:0;">OOP Playground</h1>
+      <small>Classes, objects, inheritance &amp; polymorphism (Animal example)</small>
+    </div>
+    <div style="font-size:0.8rem;opacity:0.8;">
+      <code>Animal → Dog, Cat, Bird</code>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT: Class list -->
+    <section class="panel panel-left">
+      <h2>Class Hierarchy</h2>
+      <p>Click a class to view its definition.</p>
+
+      <div class="class-list">
+        <button class="class-btn level-0 active" data-class="Animal">
+          <span>Animal</span>
+          <span class="kind">base class</span>
+        </button>
+        <button class="class-btn level-1" data-class="Dog">
+          <span>Dog</span>
+          <span class="kind">extends Animal</span>
+        </button>
+        <button class="class-btn level-2" data-class="Labrador">
+          <span>Labrador</span>
+          <span class="kind">extends Dog</span>
+        </button>
+        <button class="class-btn level-2" data-class="Husky">
+          <span>Husky</span>
+          <span class="kind">extends Dog</span>
+        </button>
+        <button class="class-btn level-1" data-class="Cat">
+          <span>Cat</span>
+          <span class="kind">extends Animal</span>
+        </button>
+        <button class="class-btn level-2" data-class="Siamese">
+          <span>Siamese</span>
+          <span class="kind">extends Cat</span>
+        </button>
+        <button class="class-btn level-2" data-class="Persian">
+          <span>Persian</span>
+          <span class="kind">extends Cat</span>
+        </button>
+        <button class="class-btn level-1" data-class="Bird">
+          <span>Bird</span>
+          <span class="kind">extends Animal</span>
+        </button>
+        <button class="class-btn level-2" data-class="Parrot">
+          <span>Parrot</span>
+          <span class="kind">extends Bird</span>
+        </button>
+        <button class="class-btn level-2" data-class="Eagle">
+          <span>Eagle</span>
+          <span class="kind">extends Bird</span>
+        </button>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <span class="dot dot-base"></span>
+          <span>
+            Base methods from <code>Animal</code> (blue buttons, e.g. <code>eat()</code>, <code>run()</code>)
+          </span>
+        </div>
+        <div class="legend-item">
+          <span class="dot dot-override"></span>
+          <span>
+            Subclass-specific methods (orange buttons, e.g. overridden <code>makeSound()</code>, special actions)
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MIDDLE: Code display -->
+    <section class="panel panel-middle">
+      <div class="code-header">
+        <h2>Class Definition</h2>
+        <span class="pill">
+          Language: <code>Java-like</code>
+        </span>
+      </div>
+      <p>
+        Select a type on the left to see its Java-style class, including fields, constructors and methods.
+      </p>
+      <div class="code-box">
+        <pre id="codeDisplay"></pre>
+      </div>
+
+      <p class="hint">
+        <strong>Polymorphism:</strong> different subclasses share the same base type
+        (<code>Animal</code>) but provide their own version of <code>makeSound()</code>
+        (and sometimes extra behaviour).
+      </p>
+    </section>
+
+    <!-- RIGHT: Object playground -->
+    <section class="panel panel-right">
+      <h2>Object Playground</h2>
+      <p>
+        Create animals (all stored as <code>Animal</code> in an array) and call
+        <code>makeSound()</code>, <code>eat()</code>, <code>run()</code>, and a special method.
+      </p>
+
+      <div class="playground-controls">
+        <button onclick="addAnimal('Dog')">+ Dog</button>
+        <button onclick="addAnimal('Labrador')">+ Labrador</button>
+        <button onclick="addAnimal('Husky')">+ Husky</button>
+        <button onclick="addAnimal('Cat')">+ Cat</button>
+        <button onclick="addAnimal('Siamese')">+ Siamese</button>
+        <button onclick="addAnimal('Persian')">+ Persian</button>
+        <button onclick="addAnimal('Bird')">+ Bird</button>
+        <button onclick="addAnimal('Parrot')">+ Parrot</button>
+        <button onclick="addAnimal('Eagle')">+ Eagle</button>
+        <button class="primary" onclick="runPolymorphismDemo()">▶ Make all animals speak</button>
+        <button class="danger" onclick="clearZoo()">✕ Clear</button>
+      </div>
+
+      <div class="playground-layout">
+        <div class="zoo-panel">
+          <h3>Zoo (objects)</h3>
+          <div class="small-label">
+            Each card: <code>declared type = Animal</code>, actual type is the subclass.
+            Max <code>6</code> animals in the array.
+          </div>
+          <div id="arrayView" class="array-view"></div>
+          <div id="zooList" class="zoo-list"></div>
+        </div>
+
+        <div class="log-panel">
+          <h3>Code &amp; behaviour log</h3>
+          <div class="small-label">
+            Live <code>ZooDemo.java</code> showing the code for your interactions.
+          </div>
+          <div id="logOutput" class="log-output"></div>
+          <div class="hint">
+            Same method call (e.g. <code>animals[i].makeSound()</code> or <code>animals[i].eat()</code>),
+            different behaviour depending on the actual object.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // --- Simple OOP model in JavaScript ---
+    class Animal {
+      constructor(name) {
+        this.name = name;
+        this.energy = 100;
+        this.lives = 1; // default, overridden in subclasses
+      }
+      makeSound() { return "Some generic animal sound"; }
+      eat() { this.energy += 10; }
+      run() {
+        this.energy -= 10;
+        if (this.energy < 0) this.energy = 0;
+      }
+    }
+
+    class Dog extends Animal {
+      constructor(name) {
+        super(name);
+        this.lives = 1; // dogs have 1 life
+      }
+      makeSound() { return "Woof!"; }
+      fetchBall() { /* ... */ }
+    }
+
+    class Cat extends Animal {
+      constructor(name) {
+        super(name);
+        this.lives = 9; // cats have 9 lives
+      }
+      makeSound() { return "Meow!"; }
+      scratch() { /* ... */ }
+    }
+
+    class Bird extends Animal {
+      makeSound() { return "Tweet!"; }
+      fly() { /* ... */ }
+    }
+
+    class Labrador extends Dog {
+      makeSound() { return "Happy woof!"; }
+      guide() { /* ... */ }
+    }
+
+    class Husky extends Dog {
+      makeSound() { return "Woof! (howl)"; }
+      pullSled() { /* ... */ }
+    }
+
+    class Siamese extends Cat {
+      makeSound() { return "Meow! (Siamese)"; }
+      sneak() { /* ... */ }
+    }
+
+    class Persian extends Cat {
+      makeSound() { return "Purr..."; }
+      groom() { /* ... */ }
+    }
+
+    class Parrot extends Bird {
+      makeSound() { return "Squawk!"; }
+      speak() { /* ... */ }
+    }
+
+    class Eagle extends Bird {
+      makeSound() { return "Screech!"; }
+      hunt() { /* ... */ }
+    }
+
+    // --- Java-like class definitions for display ---
+    const classSource = {
+      Animal: `
+class Animal {
+    protected String name;
+    private int energy = 100;
+    private int lives = 1;
+
+    public Animal(String name) {
+        this.name = name;
+    }
+
+    // ● Base implementation
+    public String makeSound() {
+        return "Some generic animal sound";
+    }
+
+    // ● Encapsulated state & behaviour
+    public void eat() { energy += 10; }
+    public void run() { energy -= 10; }
+    public int getEnergy() { return energy; }
+    public int getLives() { return lives; }
+}
+`.trim(),
+      Dog: `
+class Dog extends Animal {
+
+    public Dog(String name) {
+        super(name);
+        // dogs have 1 life by default
+    }
+
+    // ● Overridden from Animal
+    @Override
+    public String makeSound() {
+        return "Woof!";
+    }
+
+    public void fetchBall() {
+        System.out.println(name + " fetches the ball.");
+    }
+}
+`.trim(),
+      Labrador: `
+class Labrador extends Dog {
+
+    public Labrador(String name) {
+        super(name);
+    }
+
+    @Override
+    public String makeSound() {
+        return super.makeSound() + " (happy Labrador woof)";
+    }
+
+    public void guide() {
+        System.out.println(name + " helps as a guide dog.");
+    }
+}
+`.trim(),
+      Husky: `
+class Husky extends Dog {
+
+    public Husky(String name) {
+        super(name);
+    }
+
+    @Override
+    public String makeSound() {
+        return super.makeSound() + " (howl)";
+    }
+
+    public void pullSled() {
+        System.out.println(name + " pulls a sled.");
+    }
+}
+`.trim(),
+      Cat: `
+class Cat extends Animal {
+
+    public Cat(String name) {
+        super(name);
+        // cats have 9 lives
+    }
+
+    // ● Overridden from Animal
+    @Override
+    public String makeSound() {
+        return "Meow!";
+    }
+
+    public void scratch() {
+        System.out.println(name + " scratches the sofa.");
+    }
+}
+`.trim(),
+      Siamese: `
+class Siamese extends Cat {
+
+    public Siamese(String name) {
+        super(name);
+    }
+
+    @Override
+    public String makeSound() {
+        return "Meow! (Siamese)";
+    }
+
+    public void sneak() {
+        System.out.println(name + " sneaks silently.");
+    }
+}
+`.trim(),
+      Persian: `
+class Persian extends Cat {
+
+    public Persian(String name) {
+        super(name);
+    }
+
+    @Override
+    public String makeSound() {
+        return "Purr...";
+    }
+
+    public void groom() {
+        System.out.println(name + " grooms their fur.");
+    }
+}
+`.trim(),
+      Bird: `
+class Bird extends Animal {
+
+    public Bird(String name) {
+        super(name);
+    }
+
+    // ● Overridden from Animal
+    @Override
+    public String makeSound() {
+        return "Tweet!";
+    }
+
+    // Birds can still be asked to "run", but we explain the behaviour instead
+    @Override
+    public void run() {
+        System.out.println(name + " can't run — they fly instead.");
+    }
+
+    public void fly() {
+        System.out.println(name + " flies around the zoo.");
+    }
+}
+`.trim(),
+      Parrot: `
+class Parrot extends Bird {
+
+    public Parrot(String name) {
+        super(name);
+    }
+
+    @Override
+    public String makeSound() {
+        return "Squawk!";
+    }
+
+    // Inherits run() behaviour from Bird
+
+    public void speak() {
+        System.out.println(name + " says " + "\"Hello!\".");
+    }
+}
+`.trim(),
+      Eagle: `
+class Eagle extends Bird {
+
+    public Eagle(String name) {
+        super(name);
+    }
+
+    @Override
+    public String makeSound() {
+        return "Screech!";
+    }
+
+    // Inherits run() behaviour from Bird
+
+    public void hunt() {
+        System.out.println(name + " hunts from above.");
+    }
+}
+`.trim()
+    };
+
+    const MAX_ANIMALS = 6;
+    let zoo = [];
+    let nextId = 1;
+    let demoStatements = [];
+
+    const codeDisplay = document.getElementById("codeDisplay");
+    const zooList = document.getElementById("zooList");
+    const logOutput = document.getElementById("logOutput");
+
+    function setActiveClassButton(className) {
+      document.querySelectorAll(".class-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.class === className);
+      });
+    }
+
+    function showClassCode(className) {
+      setActiveClassButton(className);
+      codeDisplay.textContent = classSource[className] || "";
+    }
+
+    document.querySelectorAll(".class-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const className = btn.dataset.class;
+        showClassCode(className);
+      });
+    });
+
+    function renderDemoCode() {
+      const lines = [];
+      lines.push("public class ZooDemo {");
+      lines.push("    public static void main(String[] args) {");
+      lines.push("        Animal[] animals = new Animal[" + MAX_ANIMALS + "];");
+      lines.push("        int index = 0;");
+      lines.push("");
+
+      if (demoStatements.length === 0) {
+        lines.push("        // Add animals and call methods using the UI...");
+      } else {
+        demoStatements.forEach(stmt => lines.push("        " + stmt));
+      }
+
+      lines.push("    }");
+      lines.push("}");
+
+      logOutput.textContent = lines.join("
+");
+    }
+
+    function clearLog() {
+      demoStatements = [];
+      renderDemoCode();
+    }
+
+    function logLine(statement) {
+      demoStatements.push(statement);
+      renderDemoCode();
+    }
+
+    function renderZoo() {
+      zooList.innerHTML = "";
+
+      if (zoo.length === 0) {
+        const empty = document.createElement("div");
+        empty.textContent = "No animals yet. Add some using the buttons above.";
+        empty.style.fontSize = "0.8rem";
+        empty.style.color = "#6b7280";
+        zooList.appendChild(empty);
+      } else {
+        zoo.forEach((item, index) => {
+          const card = document.createElement("div");
+          card.className = "animal-card";
+
+          // In this demo, all animals expose run(); birds just explain what happens
+          let runButtonHtml =
+            `<button class="mini base-method" onclick="runAnimal(${index})">run()</button>`;
+
+          card.innerHTML = `
+            <div class="animal-header">
+              <span>${item.instance.name}</span>
+              <span class="badge">animals[${index}]</span>
+            </div>
+            <div class="animal-meta">Declared type: <code>${item.declaredType}</code></div>
+            <div class="animal-meta">Actual type: <code>${item.actualType}</code></div>
+            <div class="animal-meta">Lives: <code>${item.instance.lives}</code></div>
+            <div class="animal-meta">
+              Energy: <code>${item.instance.energy}</code>
+              <button class="mini base-method" onclick="eatAnimal(${index})">eat()</button>
+              ${runButtonHtml}
+            </div>
+            <div class="animal-meta">
+              Special:
+              <button class="mini special-method" onclick="specialAction(${index})">
+                ${getSpecialMethodName(item.actualType)}
+              </button>
+            </div>
+            <div class="animal-meta">
+              Code: <code>animals[${index}] = new ${item.actualType}("${item.instance.name}");</code>
+            </div>
+          `;
+          zooList.appendChild(card);
+        });
+      }
+
+      // render array view (fixed size)
+      const arrayView = document.getElementById("arrayView");
+      if (arrayView) {
+        arrayView.innerHTML = "";
+        for (let i = 0; i < MAX_ANIMALS; i++) {
+          const cell = document.createElement("div");
+          cell.className = "array-cell";
+          const animal = zoo[i];
+          cell.innerHTML = `
+            <span class="array-index">[${i}]</span>
+            <span class="array-value">${animal ? animal.actualType : "null"}</span>
+          `;
+          arrayView.appendChild(cell);
+        }
+      }
+    }
+
+    function addAnimal(actualType) {
+      if (zoo.length >= MAX_ANIMALS) {
+        logLine("// Array is full (MAX_ANIMALS = " + MAX_ANIMALS + ");");
+        return;
+      }
+
+      const declaredType = "Animal";
+      const defaultNames = {
+        Dog: ["Fido", "Rex", "Bella"],
+        Labrador: ["Buddy", "Marley", "Bailey"],
+        Husky: ["Koda", "Nova", "Ghost"],
+        Cat: ["Luna", "Milo", "Smudge"],
+        Siamese: ["Sushi", "Miso", "Nori"],
+        Persian: ["Snowball", "Prince", "Pearl"],
+        Bird: ["Kiwi", "Sunny", "Sky"],
+        Parrot: ["Polly", "Rio", "Mango"],
+        Eagle: ["Aquila", "Talon", "Storm"]
+      };
+      const options = defaultNames[actualType] || ["Unnamed"];
+      const name = options[(nextId - 1) % options.length];
+
+      let instance;
+      switch (actualType) {
+        case "Dog":      instance = new Dog(name); break;
+        case "Labrador": instance = new Labrador(name); break;
+        case "Husky":    instance = new Husky(name); break;
+        case "Cat":      instance = new Cat(name); break;
+        case "Siamese":  instance = new Siamese(name); break;
+        case "Persian":  instance = new Persian(name); break;
+        case "Bird":     instance = new Bird(name); break;
+        case "Parrot":   instance = new Parrot(name); break;
+        case "Eagle":    instance = new Eagle(name); break;
+        default:          instance = new Animal(name);
+      }
+
+      zoo.push({ id: nextId++, declaredType, actualType, instance });
+      renderZoo();
+      // When we add an object, show its class in the hierarchy/code panel
+      showClassCode(actualType);
+
+      const newIndex = zoo.length - 1;
+      logLine(`animals[${newIndex}] = new ${actualType}("${instance.name}");`);
+    }
+
+    function isBirdType(type) {
+      return type === "Bird" || type === "Parrot" || type === "Eagle";
+    }
+
+    function getSpecialMethodName(type) {
+      switch (type) {
+        case "Dog":      return "fetchBall()";
+        case "Labrador": return "guide()";
+        case "Husky":    return "pullSled()";
+        case "Cat":      return "scratch()";
+        case "Siamese":  return "sneak()";
+        case "Persian":  return "groom()";
+        case "Bird":     return "fly()";
+        case "Parrot":   return "speak()";
+        case "Eagle":    return "hunt()";
+        default:          return "specialAction()";
+      }
+    }
+
+    function getSpecialDescription(instance, type) {
+      switch (type) {
+        case "Dog":      return `${instance.name} fetches the ball.`;
+        case "Labrador": return `${instance.name} helps as a guide dog.`;
+        case "Husky":    return `${instance.name} pulls a sled.`;
+        case "Cat":      return `${instance.name} scratches the sofa.`;
+        case "Siamese":  return `${instance.name} sneaks silently.`;
+        case "Persian":  return `${instance.name} grooms their fur.`;
+        case "Bird":     return `${instance.name} flies around the zoo.`;
+        case "Parrot":   return `${instance.name} says "Hello!".`;
+        case "Eagle":    return `${instance.name} hunts from above.`;
+        default:          return `${instance.name} does something special.`;
+      }
+    }
+
+    function specialAction(index) {
+      const item = zoo[index];
+      if (!item) return;
+      const methodName = getSpecialMethodName(item.actualType).replace("()", "");
+      const desc = getSpecialDescription(item.instance, item.actualType);
+      logLine(`animals[${index}].${methodName}();    // ${desc}`);
+    }
+
+    function eatAnimal(index) {
+      const item = zoo[index];
+      if (!item) return;
+      item.instance.eat();
+      logLine(`animals[${index}].eat();    // ${item.instance.name} eats (energy now ${item.instance.energy})`);
+      renderZoo();
+    }
+
+    function runAnimal(index) {
+      const item = zoo[index];
+      if (!item) return;
+
+      if (isBirdType(item.actualType)) {
+        logLine(`animals[${index}].run();    // ${item.instance.name} can't run — they fly instead.`);
+        return;
+      }
+
+      item.instance.run();
+      logLine(`animals[${index}].run();    // ${item.instance.name} runs (energy now ${item.instance.energy})`);
+      renderZoo();
+    }
+
+    function clearZoo() {
+      zoo = [];
+      nextId = 1;
+      renderZoo();
+      clearLog();
+    }
+
+    function runPolymorphismDemo() {
+      if (zoo.length === 0) {
+        logLine("// No animals in the array. Add some first.");
+        return;
+      }
+      logLine("// Polymorphic makeSound() calls:");
+      zoo.forEach((item, index) => {
+        if (!item) return;
+        const sound = item.instance.makeSound();
+        logLine(`animals[${index}].makeSound();    // ${item.actualType} "${sound}"`);
+      });
+    }
+
+    // init
+    showClassCode("Animal");
+    renderZoo();
+    clearLog();
+  </script>
+</body>
+</html>
